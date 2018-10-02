@@ -9,6 +9,7 @@ import lib.trajectory.timing.TimedState;
 import lib.util.DriveSignal;
 
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Created by Jody on 10/2/2018.
@@ -34,16 +35,14 @@ public class AutoTesting {
 
     public void testAutoRoutine() {
         autoUtility.setTrajectory(new TrajectoryIterator<>(new TimedView<>(autoUtility.generateTrajectory
-                (false, Arrays.asList(new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.identity()),
-                        new Pose2d(new Translation2d(120.0, -36.0), Rotation2d.identity()),
-                        new Pose2d(new Translation2d(240.0, -36.0), Rotation2d.identity())),
+                (false, Arrays.asList(new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.identity()), new Pose2d(new Translation2d(120.0, 0), Rotation2d.identity())),
                         Arrays.asList(new CentripetalAccelerationConstraint(120.0)),
-                        120.0, 120.0, 10.0))));
+                        60.0, 120.0, 10.0))));
         double t = 0.0;
         Pose2d pose = autoUtility.setpoint().state().getPose();
         while (!autoUtility.isDone()) {
             updatePathFollower(t, pose);
-            pose = autoUtility.mSetpoint.state().getPose(); //Feed current pose back for testing purposes so that the robot "moves"
+            pose = autoUtility.mSetpoint.state().getPose(); //Feed current pose back for testing purposes so that the robot "moves"... use the kinematics!
             t += 0.01;
         }
     }
@@ -58,27 +57,27 @@ public class AutoTesting {
         double left_accel = radiansPerSecondToTicksPer100ms(output.left_accel) / 1000.0;
         double right_accel = radiansPerSecondToTicksPer100ms(output.right_accel) / 1000.0;
 
-        System.out.println(error);
+        System.out.println(currentRobotPose);
 
-        setOutput(new DriveSignal(radiansPerSecondToTicksPer100ms(output.left_velocity), radiansPerSecondToTicksPer100ms(output.right_velocity)),
+        setOutput(new DriveSignal(output.left_velocity, output.right_velocity),
                 new DriveSignal(output.left_feedforward_voltage / 12.0, output.right_feedforward_voltage / 12.0), left_accel, right_accel);
     }
 
     private static double radiansPerSecondToTicksPer100ms(double rad_s) {
-        return rad_s / (Math.PI * 2.0) * 4096.0 / 10.0;
+        return rad_s / (Math.PI * 2.0) * 2048.0 / 10.0;
     }
 
     //Pseudo Wrapper Method - Interface to hardware.
     public static void setOutput(DriveSignal signal, DriveSignal feedforward, double left_accel, double right_accel) {
-        double left_demand = signal.getLeft();
-        double right_demand = signal.getRight();
-        double left_feedforward = feedforward.getLeft() + (kDriveLowGearVelocityKd * left_accel / 1023.0);
-        double right_feedforward = feedforward.getRight() + (kDriveLowGearVelocityKd * right_accel / 1023.0);
+        double left_demand = radiansPerSecondToTicksPer100ms(signal.getLeft());
+        double right_demand = radiansPerSecondToTicksPer100ms(signal.getRight());
+        double left_feedforward = feedforward.getLeft() + (kDriveLowGearVelocityKd * left_accel / 1024.0);
+        double right_feedforward = feedforward.getRight() + (kDriveLowGearVelocityKd * right_accel / 1024.0);
 
-        System.out.println("Left Motor Demand:" + left_demand);
-        System.out.println("Right Motor Demand:" + right_demand);
-        System.out.println("Left Motor FF:" + left_feedforward);
-        System.out.println("Right Motor FF:" + right_feedforward);
+        System.out.println("Left Motor Velocity RPS Demand:" + signal.getLeft()/(2 * Math.PI));
+        System.out.println("Right Motor Velocity RPS Demand:" + signal.getRight()/(2 * Math.PI));
+        System.out.println("Left Motor FF Normalized Output:" + left_feedforward);
+        System.out.println("Right Motor FF Normalized Output:" + right_feedforward);
         System.out.println("----------------------------------");
 
 
