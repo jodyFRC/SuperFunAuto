@@ -9,14 +9,11 @@ import lib.trajectory.timing.TimedState;
 import lib.util.DriveSignal;
 
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Created by Jody on 10/2/2018.
  */
 public class AutoTesting {
-
-    private static SuperFunAutoUtility autoUtility;
 
     public static final double kDriveLowGearVelocityKp = 0.9;
     public static final double kDriveLowGearVelocityKi = 0.0;
@@ -24,6 +21,7 @@ public class AutoTesting {
     public static final double kDriveLowGearVelocityKf = 0.0;
     public static final int kDriveLowGearVelocityIZone = 0;
     public static final double kDriveVoltageRampRate = 0.0;
+    private static SuperFunAutoUtility autoUtility;
 
     public static void main(String[] args) {
         autoUtility = new SuperFunAutoUtility();
@@ -31,36 +29,6 @@ public class AutoTesting {
         //test.testForwardSwerveRight();
 
         test.testAutoRoutine();
-    }
-
-    public void testAutoRoutine() {
-        autoUtility.setTrajectory(new TrajectoryIterator<>(new TimedView<>(autoUtility.generateTrajectory
-                (false, Arrays.asList(new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.identity()), new Pose2d(new Translation2d(120.0, 0), Rotation2d.identity())),
-                        Arrays.asList(new CentripetalAccelerationConstraint(120.0)),
-                        60.0, 120.0, 10.0))));
-        double t = 0.0;
-        Pose2d pose = autoUtility.setpoint().state().getPose();
-        while (!autoUtility.isDone()) {
-            updatePathFollower(t, pose);
-            pose = autoUtility.mSetpoint.state().getPose(); //Feed current pose back for testing purposes so that the robot "moves"... use the kinematics!
-            t += 0.01;
-        }
-    }
-
-    //Pseudo Wrapper Method
-    public void updatePathFollower(double now, Pose2d currentRobotPose) {
-        SuperFunAutoUtility.Output output = autoUtility.update(now, currentRobotPose);
-
-        Pose2d error = autoUtility.error();
-        TimedState<Pose2dWithCurvature> path_setpoint = autoUtility.setpoint();
-
-        double left_accel = radiansPerSecondToTicksPer100ms(output.left_accel) / 1000.0;
-        double right_accel = radiansPerSecondToTicksPer100ms(output.right_accel) / 1000.0;
-
-        System.out.println(currentRobotPose);
-
-        setOutput(new DriveSignal(output.left_velocity, output.right_velocity),
-                new DriveSignal(output.left_feedforward_voltage / 12.0, output.right_feedforward_voltage / 12.0), left_accel, right_accel);
     }
 
     private static double radiansPerSecondToTicksPer100ms(double rad_s) {
@@ -89,26 +57,33 @@ public class AutoTesting {
          */
     }
 
-    public void testForwardSwerveRight() {
-
+    public void testAutoRoutine() {
         autoUtility.setTrajectory(new TrajectoryIterator<>(new TimedView<>(autoUtility.generateTrajectory
-                (false, Arrays.asList(new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.identity()),
-                        new Pose2d(new Translation2d(120.0, -36.0), Rotation2d.identity()),
-                        new Pose2d(new Translation2d(240.0, -36.0), Rotation2d.identity())),
+                (false, Arrays.asList(new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(90.0)), new Pose2d(new Translation2d(120.0, 0), Rotation2d.identity())),
                         Arrays.asList(new CentripetalAccelerationConstraint(120.0)),
-                        120.0, 120.0, 10.0))));
-
+                        60.0, 120.0, 10.0))));
         double t = 0.0;
         Pose2d pose = autoUtility.setpoint().state().getPose();
         while (!autoUtility.isDone()) {
-            autoUtility.update(t, pose);
-            //pose = autoUtility.mSetpoint.state().getPose();//.transformBy(new Pose2d(new Translation2d(0.0, 1.0),
-            pose = autoUtility.mSetpoint.state().getPose().transformBy(new Pose2d(new Translation2d(0, 0.5), Rotation2d.fromDegrees(0)));
-            // Rotation2d.fromDegrees(2.0)));
-
-            System.out.println(t + "," + autoUtility.toCSV());
-            System.out.println(autoUtility.error());
+            updatePathFollower(t, pose);
+            pose = autoUtility.mSetpoint.state().getPose(); //Feed current pose back for testing purposes so that the robot "moves"... use the kinematics!
             t += 0.01;
         }
+    }
+
+    //Pseudo Wrapper Method
+    public void updatePathFollower(double now, Pose2d currentRobotPose) {
+        SuperFunAutoUtility.Output output = autoUtility.update(now, currentRobotPose);
+
+        Pose2d error = autoUtility.error();
+        TimedState<Pose2dWithCurvature> path_setpoint = autoUtility.setpoint();
+
+        double left_accel = radiansPerSecondToTicksPer100ms(output.left_accel) / 1000.0;
+        double right_accel = radiansPerSecondToTicksPer100ms(output.right_accel) / 1000.0;
+
+        System.out.println(currentRobotPose);
+
+        setOutput(new DriveSignal(output.left_velocity, output.right_velocity),
+                new DriveSignal(output.left_feedforward_voltage / 12.0, output.right_feedforward_voltage / 12.0), left_accel, right_accel);
     }
 }
