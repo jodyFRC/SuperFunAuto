@@ -8,12 +8,13 @@ import lib.trajectory.timing.CentripetalAccelerationConstraint;
 import lib.trajectory.timing.TimedState;
 import lib.util.DriveSignal;
 
+import java.awt.*;
 import java.util.Arrays;
 
 /**
  * Created by Jody on 10/2/2018.
  */
-public class AutoTesting {
+public class AutoTesting extends Canvas {
 
     public static final double kDriveLowGearVelocityKp = 0.9;
     public static final double kDriveLowGearVelocityKi = 0.0;
@@ -24,10 +25,12 @@ public class AutoTesting {
     private static SuperFunAutoUtility autoUtility;
 
     public static void main(String[] args) {
+        EasyDrawing.beginDrawing();
+        //EasyDrawing.addRectangle(new Rectangle(0, 0, 100, 100));
+        //TODO: Create EasyDrawing plot pose method to visualize easy
+
         autoUtility = new SuperFunAutoUtility();
         AutoTesting test = new AutoTesting();
-        //test.testForwardSwerveRight();
-
         test.testAutoRoutine();
     }
 
