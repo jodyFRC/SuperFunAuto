@@ -2,57 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c0d5965e-1099-4fd6-8b87-c4c6cdc07969" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Jama/CholeskyDecomposition.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Jama/EigenvalueDecomposition.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Jama/LUDecomposition.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Jama/Matrix.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Jama/QRDecomposition.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Jama/SingularValueDecomposition.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Jama/examples/MagicSquareExample.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Jama/test/TestMatrix.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Jama/util/Maths.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/Displacement1d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/ICurvature.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/IPose2d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/IRotation2d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/ITranslation2d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/Pose2d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/Pose2dWithCurvature.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/Rotation2d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/State.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/Translation2d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/geometry/Twist2d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/physics/DCMotorTransmission.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/physics/DifferentialDrive.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/physics/DriveCharacterization.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/spline/CubicHermiteSpline.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/spline/QuinticHermiteSpline.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/spline/Spline.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/spline/SplineGenerator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/DistanceView.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/IPathFollower.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/PurePursuitController.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/TimedView.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/Trajectory.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/TrajectoryIterator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/TrajectoryPoint.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/TrajectorySamplePoint.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/TrajectoryUtil.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/TrajectoryView.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/timing/CentripetalAccelerationConstraint.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/timing/DifferentialDriveDynamicsConstraint.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/timing/TimedState.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/timing/TimingConstraint.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/timing/TimingUtil.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/trajectory/timing/VelocityLimitRegionConstraint.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/util/DriveSignal.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/util/Interpolable.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/util/InterpolatingDouble.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/util/InterpolatingLong.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/util/InterpolatingTreeMap.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/util/InverseInterpolable.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/util/PolynomialRegression.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/lib/util/Units.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -75,8 +24,8 @@
       <file leaf-file-name="AutoTesting.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/AutoTesting.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="30" column="38" lean-forward="false" selection-start-line="30" selection-start-column="38" selection-end-line="30" selection-end-column="38" />
+            <state relative-caret-position="272">
+              <caret line="43" column="40" lean-forward="true" selection-start-line="43" selection-start-column="40" selection-end-line="43" selection-end-column="40" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -561,12 +510,19 @@
       <option name="project" value="LOCAL" />
       <updated>1538462661103</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="libs and stuff">
+      <created>1538462716549</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1538462716549</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="2576" height="1056" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -583,7 +539,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13359375" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13359375" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="FRC" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32934782" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -606,7 +562,8 @@
     <MESSAGE value="code" />
     <MESSAGE value="fun code for all" />
     <MESSAGE value="yay" />
-    <option name="LAST_COMMIT_MESSAGE" value="yay" />
+    <MESSAGE value="libs and stuff" />
+    <option name="LAST_COMMIT_MESSAGE" value="libs and stuff" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -961,7 +918,7 @@
         <state relative-caret-position="-748">
           <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1018,8 +975,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/AutoTesting.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="30" column="38" lean-forward="false" selection-start-line="30" selection-start-column="38" selection-end-line="30" selection-end-column="38" />
+        <state relative-caret-position="272">
+          <caret line="43" column="40" lean-forward="true" selection-start-line="43" selection-start-column="40" selection-end-line="43" selection-end-column="40" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
