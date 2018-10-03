@@ -11,7 +11,7 @@ public class EasyDrawing extends Canvas {
     public static Canvas beginDrawing() {
         JFrame frame = new JFrame();
         Canvas canvas = new EasyDrawing();
-        canvas.setSize(400, 400);
+        canvas.setSize(1200, 1200);
         frame.add(canvas);
         frame.pack();
         frame.setVisible(true);
@@ -24,6 +24,13 @@ public class EasyDrawing extends Canvas {
     }
 
     public void paint(Graphics g) {
+        for (int x = 0; x <= 1000; x = x + 100) {
+            g.drawLine(x, 0, x, 1000);
+        }
+        for (int y = 0; y <= 1000; y = y + 100) {
+            g.drawLine(0, y, 1000, y);
+        }
+
         for (Rectangle rect : rectangles) {
             g.drawRect(rect.x, rect.y, rect.width, rect.height);
         }
