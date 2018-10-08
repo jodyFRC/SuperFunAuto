@@ -45,11 +45,12 @@ public class AutoTesting extends Canvas {
         double left_feedforward = feedforward.getLeft() + (kDriveLowGearVelocityKd * left_accel / 1024.0);
         double right_feedforward = feedforward.getRight() + (kDriveLowGearVelocityKd * right_accel / 1024.0);
 
-        System.out.println("Left Motor Velocity RPS Demand:" + signal.getLeft()/(2 * Math.PI));
-        System.out.println("Right Motor Velocity RPS Demand:" + signal.getRight()/(2 * Math.PI));
-        System.out.println("Left Motor FF Normalized Output:" + left_feedforward);
-        System.out.println("Right Motor FF Normalized Output:" + right_feedforward);
-        System.out.println("----------------------------------");
+
+        //System.out.println("Left Motor Velocity RPS Demand:" + signal.getLeft()/(2 * Math.PI));
+        //System.out.println("Right Motor Velocity RPS Demand:" + signal.getRight()/(2 * Math.PI));
+        //System.out.println("Left Motor FF Normalized Output:" + left_feedforward);
+        //System.out.println("Right Motor FF Normalized Output:" + right_feedforward);
+        //System.out.println("----------------------------------");
 
 
         /*  Real Hardware Impl.
@@ -61,13 +62,21 @@ public class AutoTesting extends Canvas {
     }
 
     public void testAutoRoutine() {
+        /*
         autoUtility.setTrajectory(new TrajectoryIterator<>(new TimedView<>(autoUtility.generateTrajectory
-                (false, Arrays.asList(new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(90.0)), new Pose2d(new Translation2d(120.0, 0), Rotation2d.identity())),
+                (false, Arrays.asList(new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.00)), new Pose2d(new Translation2d(4.25, -0.25), Rotation2d.fromDegrees(10)), new Pose2d(new Translation2d(6, 4.25), Rotation2d.fromDegrees(85)), new Pose2d(new Translation2d(6.75, 5), Rotation2d.fromDegrees(-5))),
                         Arrays.asList(new CentripetalAccelerationConstraint(120.0)),
                         60.0, 120.0, 10.0))));
+                        */
+        autoUtility.setTrajectory(new TrajectoryIterator<>(new TimedView<>(autoUtility.generateTrajectory
+                (false, Arrays.asList(new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.00)), new Pose2d(new Translation2d(100, 100), Rotation2d.fromDegrees(0))),
+                        Arrays.asList(new CentripetalAccelerationConstraint(120.0)),
+                        120.0, 120.0, 10.0))));
+
         double t = 0.0;
         Pose2d pose = autoUtility.setpoint().state().getPose();
         while (!autoUtility.isDone()) {
+            EasyDrawing.addRobotPose(pose.getTranslation().x(), pose.getTranslation().y());
             updatePathFollower(t, pose);
             pose = autoUtility.mSetpoint.state().getPose(); //Feed current pose back for testing purposes so that the robot "moves"... use the kinematics!
             t += 0.01;
@@ -84,7 +93,9 @@ public class AutoTesting extends Canvas {
         double left_accel = radiansPerSecondToTicksPer100ms(output.left_accel) / 1000.0;
         double right_accel = radiansPerSecondToTicksPer100ms(output.right_accel) / 1000.0;
 
-        System.out.println(currentRobotPose);
+        //System.out.println(currentRobotPose);
+
+        System.out.println(output.left_feedforward_voltage + " " + output.right_feedforward_voltage);
 
         setOutput(new DriveSignal(output.left_velocity, output.right_velocity),
                 new DriveSignal(output.left_feedforward_voltage / 12.0, output.right_feedforward_voltage / 12.0), left_accel, right_accel);
