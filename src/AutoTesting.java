@@ -69,8 +69,8 @@ public class AutoTesting extends Canvas {
                         60.0, 120.0, 10.0))));
                         */
         autoUtility.setTrajectory(new TrajectoryIterator<>(new TimedView<>(autoUtility.generateTrajectory
-                (false, Arrays.asList(new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.00)), new Pose2d(new Translation2d(100, 100), Rotation2d.fromDegrees(0))),
-                        Arrays.asList(new CentripetalAccelerationConstraint(120.0)),
+                (false, Arrays.asList(new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.00)), new Pose2d(new Translation2d(50, 0), Rotation2d.fromDegrees(0))),
+                        Arrays.asList(new CentripetalAccelerationConstraint(60.0)),
                         120.0, 120.0, 10.0))));
 
         double t = 0.0;
@@ -81,6 +81,7 @@ public class AutoTesting extends Canvas {
             pose = autoUtility.mSetpoint.state().getPose(); //Feed current pose back for testing purposes so that the robot "moves"... use the kinematics!
             t += 0.01;
         }
+        System.out.println("Time: " + t);
     }
 
     //Pseudo Wrapper Method
@@ -95,7 +96,7 @@ public class AutoTesting extends Canvas {
 
         //System.out.println(currentRobotPose);
 
-        System.out.println(output.left_feedforward_voltage + " " + output.right_feedforward_voltage);
+        System.out.println(output.left_velocity + " " + output.right_velocity);
 
         setOutput(new DriveSignal(output.left_velocity, output.right_velocity),
                 new DriveSignal(output.left_feedforward_voltage / 12.0, output.right_feedforward_voltage / 12.0), left_accel, right_accel);
