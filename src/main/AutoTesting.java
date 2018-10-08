@@ -79,14 +79,14 @@ public class AutoTesting extends Canvas {
                         60.0, 120.0, 10.0))));
                         */
         autoUtility.setTrajectory(new TrajectoryIterator<>(new TimedView<>(autoUtility.generateTrajectory
-                (false, Arrays.asList(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0.00)), new Pose2d(new Translation2d(100, 50), Rotation2d.fromDegrees(0))),
+                (false, Arrays.asList(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0.00)), new Pose2d(new Translation2d(25, 0), Rotation2d.fromDegrees(0)), new Pose2d(new Translation2d(50, 25), Rotation2d.fromDegrees(90)), new Pose2d(new Translation2d(25, 50), Rotation2d.fromDegrees(180))),
                         Arrays.asList(new CentripetalAccelerationConstraint(60.0)),
                         120.0, 120.0, 10.0))));
 
         double t = 0.0;
         Pose2d pose;
 
-        RobotState.getInstance().reset(0.0, new Pose2d(new Translation2d(0.0, 10.0), Rotation2d.fromDegrees(0.00))); //Initial Robot State (we can add error by having it start initially at a point that the trajectory doesn't start at!)
+        RobotState.getInstance().reset(0.0, new Pose2d(new Translation2d(5, 5), Rotation2d.fromDegrees(0.00))); //Initial Robot State (we can add error by having it start initially at a point that the trajectory doesn't start at!)
 
         while (!autoUtility.isDone()) {
 
@@ -96,6 +96,12 @@ public class AutoTesting extends Canvas {
 
             updatePathFollower(t, pose);
             main.EasyDrawing.addRobotPose(pose.getTranslation().x(), pose.getTranslation().y(), Color.BLUE);
+
+            try {
+                //Thread.sleep(100);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             t += dt;
         }
@@ -110,9 +116,17 @@ public class AutoTesting extends Canvas {
     public void updatePathFollower(double now, Pose2d currentRobotPose) {
         SuperFunAutoUtility.Output output = autoUtility.update(now, currentRobotPose);
 
+        //dirty integration . . . we are assuming the robot can match wheel velo with desired velos
+        //also assume robot can get the desired angular velocity it wants instantly
+        left_encoder_dist = left_encoder_dist + ((output.left_velocity + Math.random() * 0) * dt);  //radians
+        right_encoder_dist = right_encoder_dist + ((output.right_velocity + Math.random() * 0) * dt);
+        gyro_angle = gyro_angle + (output.angular_velocity);
+
         Pose2d error = autoUtility.error();
         TimedState<Pose2dWithCurvature> path_setpoint = autoUtility.setpoint();
         main.EasyDrawing.addRobotPose(path_setpoint.state().getTranslation().x(), path_setpoint.state().getTranslation().y(), Color.RED);
+
+        //main.EasyDrawing.addRobotPose(currentRobotPose.getTranslation().x() + 10*Math.cos(Math.toRadians(gyro_angle)), currentRobotPose.getTranslation().y() + 10*Math.sin(Math.toRadians(gyro_angle)), Color.GREEN);
 
         double left_accel = radiansPerSecondToTicksPer100ms(output.left_accel) / 1000.0;
         double right_accel = radiansPerSecondToTicksPer100ms(output.right_accel) / 1000.0;
@@ -121,18 +135,14 @@ public class AutoTesting extends Canvas {
         stateEstimator.onLoop(now, rotationToLinear(left_encoder_dist), rotationToLinear(right_encoder_dist), 0, 0, gyro_angle);
         //throw setpoint rotation back and just treat as gyro for now
 
-        RobotState.getInstance().outputToSmartDashboard();
+        //RobotState.getInstance().outputToSmartDashboard();
         System.out.println(error.getPose().toString());
+        System.out.println(gyro_angle);
         System.out.println(rotationToLinear(output.left_velocity) + " " + rotationToLinear(output.right_velocity));
+        EasyDrawing.debug_info = rotationToLinear(output.left_velocity) + " " + rotationToLinear(output.right_velocity);
         System.out.println("-----");
 
         setOutput(new DriveSignal(output.left_velocity, output.right_velocity),
                 new DriveSignal(output.left_feedforward_voltage / 12.0, output.right_feedforward_voltage / 12.0), left_accel, right_accel);
-
-        //dirty integration . . . we are assuming the robot can match wheel velo with desired velos
-        //also assume robot can get the desired angular velocity it wants instantly
-        left_encoder_dist = left_encoder_dist + ((output.left_velocity + Math.random() * 0) * dt);  //radians
-        right_encoder_dist = right_encoder_dist + ((output.right_velocity + Math.random() * 0) * dt);
-        gyro_angle = gyro_angle + (output.angular_velocity);
     }
 }

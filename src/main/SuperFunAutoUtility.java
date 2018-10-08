@@ -1,4 +1,9 @@
-import lib.geometry.*;
+package main;
+
+import lib.geometry.Pose2d;
+import lib.geometry.Pose2dWithCurvature;
+import lib.geometry.Rotation2d;
+import lib.geometry.Translation2d;
 import lib.physics.DCMotorTransmission;
 import lib.physics.DifferentialDrive;
 import lib.trajectory.*;
@@ -15,37 +20,30 @@ import java.util.List;
 
 public class SuperFunAutoUtility {
 
-    DifferentialDrive mModel;
-    TrajectoryIterator<TimedState<Pose2dWithCurvature>> mCurrentTrajectory;
-    boolean mIsReversed = false;
-    double mLastTime = Double.POSITIVE_INFINITY;
-    public TimedState<Pose2dWithCurvature> mSetpoint = new TimedState<>(Pose2dWithCurvature.identity());
-    Pose2d mError = Pose2d.identity();
-    Output mOutput = new Output();
-
     public static final double kPathKX = 4.0;  // units/s per unit of error
-    public static final double kPathLookaheadTime = 0.4;  // seconds to look ahead along the path for steering
-    public static final double kPathMinLookaheadDistance = 24.0;  // inches
-
+    public static final double kPathLookaheadTime = 0.25;  // seconds to look ahead along the path for steering
+    public static final double kPathMinLookaheadDistance = 5.0;  // inches
     public static final double kRobotLinearInertia = 60.0;  // kg TODO tune
     public static final double kRobotAngularInertia = 10.0;  // kg m^2 TODO tune
     public static final double kRobotAngularDrag = 12.0;  // N*m / (rad/sec) TODO tune
     public static final double kDriveVIntercept = 1.055;  // V
     public static final double kDriveKv = 0.135;  // V per rad/s
     public static final double kDriveKa = 0.012;  // V per rad/s^2
-
     public static final double kDriveWheelTrackWidthInches = 25.54;
     public static final double kDriveWheelDiameterInches = 3.92820959548 * 0.99;
     public static final double kDriveWheelRadiusInches = kDriveWheelDiameterInches / 2.0;
     public static final double kTrackScrubFactor = 1.0;  // Tune me!
-
     private static final double kMaxDx = 2.0;
     private static final double kMaxDy = 0.25;
     private static final double kMaxDTheta = Math.toRadians(5.0);
-
+    public TimedState<Pose2dWithCurvature> mSetpoint = new TimedState<>(Pose2dWithCurvature.identity());
+    DifferentialDrive mModel;
+    TrajectoryIterator<TimedState<Pose2dWithCurvature>> mCurrentTrajectory;
+    boolean mIsReversed = false;
+    double mLastTime = Double.POSITIVE_INFINITY;
+    Pose2d mError = Pose2d.identity();
+    Output mOutput = new Output();
     double mDt = 0.0;
-
-
 
     public SuperFunAutoUtility() {
         final DCMotorTransmission transmission = new DCMotorTransmission(
@@ -221,32 +219,31 @@ public class SuperFunAutoUtility {
         dynamics.chassis_velocity = adjusted_velocity;
         dynamics.wheel_velocity = mModel.solveInverseKinematics(adjusted_velocity);
         return new Output(dynamics.wheel_velocity.left, dynamics.wheel_velocity.right, dynamics.wheel_acceleration
-                .left, dynamics.wheel_acceleration.right, dynamics.voltage.left, dynamics.voltage.right);
+                .left, dynamics.wheel_acceleration.right, dynamics.voltage.left, dynamics.voltage.right, adjusted_velocity.angular);
     }
 
     public static class Output {
+        public double left_velocity;  // rad/s
+        public double right_velocity;  // rad/s
+        public double left_accel;  // rad/s^2
+        public double right_accel;  // rad/s^2
+        public double left_feedforward_voltage;
+        public double right_feedforward_voltage;
+        double angular_velocity;
         public Output() {
         }
 
         public Output(double left_velocity, double right_velocity, double left_accel, double right_accel,
                       double left_feedforward_voltage, double
-                              right_feedforward_voltage) {
+                              right_feedforward_voltage, double angular_velocity) {
             this.left_velocity = left_velocity;
             this.right_velocity = right_velocity;
             this.left_accel = left_accel;
             this.right_accel = right_accel;
             this.left_feedforward_voltage = left_feedforward_voltage;
             this.right_feedforward_voltage = right_feedforward_voltage;
+            this.angular_velocity = angular_velocity;
         }
-
-        public double left_velocity;  // rad/s
-        public double right_velocity;  // rad/s
-
-        public double left_accel;  // rad/s^2
-        public double right_accel;  // rad/s^2
-
-        public double left_feedforward_voltage;
-        public double right_feedforward_voltage;
 
         public void flip() {
             double tmp_left_velocity = left_velocity;
