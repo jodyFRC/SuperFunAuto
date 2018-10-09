@@ -79,14 +79,14 @@ public class AutoTesting extends Canvas {
                         60.0, 120.0, 10.0))));
                         */
         autoUtility.setTrajectory(new TrajectoryIterator<>(new TimedView<>(autoUtility.generateTrajectory
-                (false, Arrays.asList(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0.00)), new Pose2d(new Translation2d(25, 0), Rotation2d.fromDegrees(0)), new Pose2d(new Translation2d(50, 25), Rotation2d.fromDegrees(90)), new Pose2d(new Translation2d(25, 50), Rotation2d.fromDegrees(180))),
+                (false, Arrays.asList(new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0.00)), new Pose2d(new Translation2d(45, 2.5), Rotation2d.fromDegrees(0)), new Pose2d(new Translation2d(60, 50), Rotation2d.fromDegrees(90)), new Pose2d(new Translation2d(70, 50), Rotation2d.fromDegrees(0))),
                         Arrays.asList(new CentripetalAccelerationConstraint(60.0)),
                         120.0, 120.0, 10.0))));
 
         double t = 0.0;
         Pose2d pose;
 
-        RobotState.getInstance().reset(0.0, new Pose2d(new Translation2d(5, 5), Rotation2d.fromDegrees(0.00))); //Initial Robot State (we can add error by having it start initially at a point that the trajectory doesn't start at!)
+        RobotState.getInstance().reset(0.0, new Pose2d(new Translation2d(0, 5), Rotation2d.fromDegrees(0.00))); //Initial Robot State (we can add error by having it start initially at a point that the trajectory doesn't start at!)
 
         while (!autoUtility.isDone()) {
 
@@ -98,7 +98,7 @@ public class AutoTesting extends Canvas {
             main.EasyDrawing.addRobotPose(pose.getTranslation().x(), pose.getTranslation().y(), Color.BLUE);
 
             try {
-                //Thread.sleep(100);
+                Thread.sleep(40);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -126,7 +126,21 @@ public class AutoTesting extends Canvas {
         TimedState<Pose2dWithCurvature> path_setpoint = autoUtility.setpoint();
         main.EasyDrawing.addRobotPose(path_setpoint.state().getTranslation().x(), path_setpoint.state().getTranslation().y(), Color.RED);
 
-        //main.EasyDrawing.addRobotPose(currentRobotPose.getTranslation().x() + 10*Math.cos(Math.toRadians(gyro_angle)), currentRobotPose.getTranslation().y() + 10*Math.sin(Math.toRadians(gyro_angle)), Color.GREEN);
+        double x_a = currentRobotPose.getTranslation().x() + (8.3 * Math.cos(Math.toRadians(currentRobotPose.getRotation().getDegrees())));
+        double y_a = currentRobotPose.getTranslation().y() + (8.3 * Math.sin(Math.toRadians(currentRobotPose.getRotation().getDegrees())));
+
+        double x_b = currentRobotPose.getTranslation().x() + (6.5 * Math.cos(Math.toRadians(currentRobotPose.getRotation().getDegrees() + 90)));
+        double y_b = currentRobotPose.getTranslation().y() + (6.5 * Math.sin(Math.toRadians(currentRobotPose.getRotation().getDegrees() + 90)));
+
+        double x_c = x_a + (6.5 * Math.cos(Math.toRadians(currentRobotPose.getRotation().getDegrees() + 90)));
+        double y_c = y_a + (6.5 * Math.sin(Math.toRadians(currentRobotPose.getRotation().getDegrees() + 90)));
+
+        double dist_front_back = Math.sqrt(Math.pow((x_a - currentRobotPose.getTranslation().x()), 2) + Math.pow((y_a - currentRobotPose.getTranslation().y()), 2));
+        System.out.println(dist_front_back);
+
+        main.EasyDrawing.addRobotPose(x_a, y_a, Color.GREEN);
+        main.EasyDrawing.addRobotPose(x_b, y_b, Color.PINK);
+        main.EasyDrawing.addRobotPose(x_c, y_c, Color.ORANGE);
 
         double left_accel = radiansPerSecondToTicksPer100ms(output.left_accel) / 1000.0;
         double right_accel = radiansPerSecondToTicksPer100ms(output.right_accel) / 1000.0;
@@ -137,9 +151,8 @@ public class AutoTesting extends Canvas {
 
         //RobotState.getInstance().outputToSmartDashboard();
         System.out.println(error.getPose().toString());
-        System.out.println(gyro_angle);
         System.out.println(rotationToLinear(output.left_velocity) + " " + rotationToLinear(output.right_velocity));
-        EasyDrawing.debug_info = rotationToLinear(output.left_velocity) + " " + rotationToLinear(output.right_velocity);
+        EasyDrawing.debug_info = rotationToLinear(output.left_velocity) + " " + rotationToLinear(output.right_velocity) + "          " + currentRobotPose.getRotation().getDegrees() + "        " + dist_front_back;
         System.out.println("-----");
 
         setOutput(new DriveSignal(output.left_velocity, output.right_velocity),
