@@ -67,8 +67,8 @@ public class AutoTesting extends Canvas {
                     mPeriodicIO.right_feedforward + Constants.kDriveLowGearVelocityKd * mPeriodicIO.right_accel / 1023.0);
          */
 
-
-        drivetrainControl.update(signal.getLeft(), signal.getRight(), left_feedforward, right_feedforward);
+        drivetrainControl.setDesired(signal.getLeft(), signal.getRight(), left_feedforward, right_feedforward);
+        drivetrainControl.update(signal.getLeft() + (Math.random() * 0.1 - 0.05), signal.getRight() + (Math.random() * 0.1 - 0.05)); //TODO: For testing, we feed back our desired as actual with some (error)
     }
 
     public void testAutoRoutine() {
@@ -80,12 +80,10 @@ public class AutoTesting extends Canvas {
         double t = 0.0;
         Pose2d pose;
 
-        RobotState.getInstance().reset(0.0, new Pose2d(new Translation2d(1, 2.5), Rotation2d.fromDegrees(0.00))); //Initial Robot State (we can add error by having it start initially at a point that the trajectory doesn't start at!)
+        RobotState.getInstance().reset(0.0, new Pose2d(new Translation2d(1, 1), Rotation2d.fromDegrees(0.00))); //Initial Robot State (we can add error by having it start initially at a point that the trajectory doesn't start at!)
 
         while (!autoUtility.isDone()) {
-
             //pose = autoUtility.mSetpoint.state().getPose(); //Feed current pose back for testing purposes so that the robot "moves"... use the kinematics!
-
             pose = RobotState.getInstance().getFieldToVehicle(t); //Test by feeding back calculated physical encoder values via integration and then applying kinematics
 
             updatePathFollower(t, pose);
@@ -115,9 +113,9 @@ public class AutoTesting extends Canvas {
 
         //---------------------------------------------
         //On Real Robot, these need to be sensor driven values
-        left_encoder_dist = left_encoder_dist + ((output.left_velocity + Math.random() * 0) * dt);  //radians
-        right_encoder_dist = right_encoder_dist + ((output.right_velocity + Math.random() * 0) * dt);
-        gyro_angle = gyro_angle + (output.angular_velocity * 1);
+        left_encoder_dist = left_encoder_dist + ((output.left_velocity * 1) * dt);  //radians
+        right_encoder_dist = right_encoder_dist + ((output.right_velocity * 1) * dt);
+        gyro_angle = gyro_angle + (output.angular_velocity);
         //---------------------------------------------
 
         Pose2d error = autoUtility.error();
