@@ -20,9 +20,8 @@ import java.util.List;
 
 public class SuperFunAutoUtility {
 
-    public static final double kPathKX = 4.0;  // units/s per unit of error
-    public static final double kPathLookaheadTime = 0.25;  // seconds to look ahead along the path for steering
-    public static final double kPathMinLookaheadDistance = 5.0;  // inches
+    public static final double kPathLookaheadTime = 0.1;  // seconds to look ahead along the path for steering
+    public static final double kPathMinLookaheadDistance = 3.0;  // inches
     public static final double kRobotLinearInertia = 60.0;  // kg TODO tune
     public static final double kRobotAngularInertia = 10.0;  // kg m^2 TODO tune
     public static final double kRobotAngularDrag = 12.0;  // N*m / (rad/sec) TODO tune
@@ -36,6 +35,11 @@ public class SuperFunAutoUtility {
     private static final double kMaxDx = 2.0;
     private static final double kMaxDy = 0.25;
     private static final double kMaxDTheta = Math.toRadians(5.0);
+    public static double kPathKX = 10;  // units/s per unit of error
+    final DCMotorTransmission transmission = new DCMotorTransmission(
+            1.0 / kDriveKv,
+            Units.inches_to_meters(kDriveWheelRadiusInches) * Units.inches_to_meters(kDriveWheelRadiusInches) * kRobotLinearInertia / (2.0 * kDriveKa),
+            kDriveVIntercept);
     public TimedState<Pose2dWithCurvature> mSetpoint = new TimedState<>(Pose2dWithCurvature.identity());
     DifferentialDrive mModel;
     TrajectoryIterator<TimedState<Pose2dWithCurvature>> mCurrentTrajectory;
@@ -44,12 +48,13 @@ public class SuperFunAutoUtility {
     Pose2d mError = Pose2d.identity();
     Output mOutput = new Output();
     double mDt = 0.0;
+    double lastDistanceError = 0;
+    double lastAngleVelocity = 0;
+    double lastCurvature = 0;
+    DifferentialDrive.ChassisState prev_velocity_ = new DifferentialDrive.ChassisState();
 
     public SuperFunAutoUtility() {
-        final DCMotorTransmission transmission = new DCMotorTransmission(
-                1.0 / kDriveKv,
-                Units.inches_to_meters(kDriveWheelRadiusInches) * Units.inches_to_meters(kDriveWheelRadiusInches) * kRobotLinearInertia / (2.0 * kDriveKa),
-                kDriveVIntercept);
+
         mModel = new DifferentialDrive(
                 kRobotLinearInertia,
                 kRobotAngularInertia,
@@ -163,24 +168,20 @@ public class SuperFunAutoUtility {
         mSetpoint = sample_point.state();
 
         if (!mCurrentTrajectory.isDone()) {
-            // Generate feedforward voltages.
             final double velocity_m = Units.inches_to_meters(mSetpoint.velocity());
             final double curvature_m = Units.meters_to_inches(mSetpoint.state().getCurvature());
             final double dcurvature_ds_m = Units.meters_to_inches(Units.meters_to_inches(mSetpoint.state()
                     .getDCurvatureDs()));
             final double acceleration_m = Units.inches_to_meters(mSetpoint.acceleration());
-            final DifferentialDrive.DriveDynamics dynamics = mModel.solveInverseDynamics(
-                    new DifferentialDrive.ChassisState(velocity_m, velocity_m * curvature_m),
-                    new DifferentialDrive.ChassisState(acceleration_m,
-                            acceleration_m * curvature_m + velocity_m * velocity_m * dcurvature_ds_m));
-            mError = current_state.inverse().transformBy(mSetpoint.state().getPose());
-            mOutput = updatePurePursuit(dynamics, current_state);
-        }
 
+            mError = current_state.inverse().transformBy(mSetpoint.state().getPose());
+            mOutput = updatePurePursuit(new DifferentialDrive.ChassisState(velocity_m, velocity_m * curvature_m), new DifferentialDrive.ChassisState(acceleration_m,
+                    acceleration_m * curvature_m + velocity_m * velocity_m * dcurvature_ds_m), current_state, mDt);
+        }
         return mOutput;
     }
 
-    protected Output updatePurePursuit(DifferentialDrive.DriveDynamics dynamics, Pose2d current_state) {
+    protected Output updatePurePursuit(DifferentialDrive.ChassisState chassis_velocity, DifferentialDrive.ChassisState chassis_accel, Pose2d current_state, double mDt) {
         double lookahead_time = kPathLookaheadTime;
         final double kLookaheadSearchDt = 0.01;
         TimedState<Pose2dWithCurvature> lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
@@ -200,27 +201,54 @@ public class SuperFunAutoUtility {
         }
 
         DifferentialDrive.ChassisState adjusted_velocity = new DifferentialDrive.ChassisState();
-        // Feedback on longitudinal error (distance).
-        adjusted_velocity.linear = dynamics.chassis_velocity.linear + kPathKX * Units.inches_to_meters
-                (mError.getTranslation().x());
+        DifferentialDrive.ChassisState adjusted_accel = new DifferentialDrive.ChassisState();
+
+        double distanceError = Units.inches_to_meters(mError.getTranslation().x());
+
+        // Feedback on longitudinal error (distance) with P controller ... D doesn't work very well in simu
+        double distanceCorrect = (kPathKX * distanceError);
+        adjusted_velocity.linear = chassis_velocity.linear + distanceCorrect;
+        adjusted_accel.linear = chassis_accel.linear;
+
+        lastDistanceError = distanceError;
 
         // Use pure pursuit to peek ahead along the trajectory and generate a new curvature.
         final PurePursuitController.Arc<Pose2dWithCurvature> arc = new PurePursuitController.Arc<>(current_state,
                 lookahead_state.state());
 
         double curvature = 1.0 / Units.inches_to_meters(arc.radius);
-        if (Double.isInfinite(curvature)) {
-            adjusted_velocity.linear = 0.0;
-            adjusted_velocity.angular = dynamics.chassis_velocity.angular;
-        } else {
-            adjusted_velocity.angular = curvature * dynamics.chassis_velocity.linear;
+
+        if (distanceError < -0.1) { //this hack works lol
+            double curveMin = Math.abs(lastCurvature);
+            if (Math.abs(curvature) > curveMin) {
+                curvature = Math.signum(curvature) * (curveMin + 1.5);
+            }
         }
 
-        dynamics.chassis_velocity = adjusted_velocity;
-        dynamics.wheel_velocity = mModel.solveInverseKinematics(adjusted_velocity);
-        return new Output(dynamics.wheel_velocity.left, dynamics.wheel_velocity.right, dynamics.wheel_acceleration
-                .left, dynamics.wheel_acceleration.right, dynamics.voltage.left, dynamics.voltage.right, adjusted_velocity.angular);
+        lastCurvature = curvature;
+
+        if (Double.isInfinite(curvature)) {
+            adjusted_velocity.linear = 0.0;
+            adjusted_velocity.angular = chassis_velocity.angular;
+            adjusted_accel.angular = chassis_accel.angular;
+        } else {
+            adjusted_velocity.angular = curvature * chassis_velocity.linear;
+            double ang_accel = (adjusted_velocity.angular - lastAngleVelocity) / mDt;
+            adjusted_accel.angular = ang_accel;
+            if (Double.isNaN(adjusted_accel.angular)) {
+                adjusted_accel.angular = 0.0;
+            }
+        }
+
+        //Instead of using raw predicted trajectory as feed forward, we can use the dynamics calculated via pure pursuit to generate real feed forwards that converge us back on path
+        DifferentialDrive.DriveDynamics recalcDynamics = mModel.solveInverseDynamics(adjusted_velocity, adjusted_accel);
+
+        lastAngleVelocity = adjusted_velocity.angular;
+
+        return new Output(recalcDynamics.wheel_velocity.left, recalcDynamics.wheel_velocity.right, recalcDynamics.wheel_acceleration
+                .left, recalcDynamics.wheel_acceleration.right, recalcDynamics.voltage.left, recalcDynamics.voltage.right, adjusted_velocity.angular);
     }
+
 
     public static class Output {
         public double left_velocity;  // rad/s
@@ -230,6 +258,7 @@ public class SuperFunAutoUtility {
         public double left_feedforward_voltage;
         public double right_feedforward_voltage;
         double angular_velocity;
+
         public Output() {
         }
 
