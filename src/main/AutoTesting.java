@@ -68,7 +68,7 @@ public class AutoTesting extends Canvas {
          */
 
         drivetrainControl.setDesired(signal.getLeft(), signal.getRight(), left_feedforward, right_feedforward);
-        drivetrainControl.update(signal.getLeft() + (Math.random() * 0.1 - 0.05), signal.getRight() + (Math.random() * 0.1 - 0.05)); //TODO: For testing, we feed back our desired as actual with some (error)
+        drivetrainControl.update(signal.getLeft(), signal.getRight()); //TODO: For testing, we feed back our desired as actual with some (error)
     }
 
     public void testAutoRoutine() {
@@ -80,7 +80,7 @@ public class AutoTesting extends Canvas {
         double t = 0.0;
         Pose2d pose;
 
-        RobotState.getInstance().reset(0.0, new Pose2d(new Translation2d(1, 1), Rotation2d.fromDegrees(0.00))); //Initial Robot State (we can add error by having it start initially at a point that the trajectory doesn't start at!)
+        RobotState.getInstance().reset(0.0, new Pose2d(new Translation2d(0, 1), Rotation2d.fromDegrees(0.00))); //Initial Robot State (we can add error by having it start initially at a point that the trajectory doesn't start at!)
 
         while (!autoUtility.isDone()) {
             //pose = autoUtility.mSetpoint.state().getPose(); //Feed current pose back for testing purposes so that the robot "moves"... use the kinematics!
@@ -90,7 +90,7 @@ public class AutoTesting extends Canvas {
             main.EasyDrawing.addRobotPose(pose.getTranslation().x(), pose.getTranslation().y(), Color.BLUE);
 
             try {
-                Thread.sleep(20);
+                Thread.sleep(10);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -113,9 +113,19 @@ public class AutoTesting extends Canvas {
 
         //---------------------------------------------
         //On Real Robot, these need to be sensor driven values
-        left_encoder_dist = left_encoder_dist + ((output.left_velocity * 1) * dt);  //radians
-        right_encoder_dist = right_encoder_dist + ((output.right_velocity * 1) * dt);
-        gyro_angle = gyro_angle + (output.angular_velocity);
+        //left_encoder_dist = left_encoder_dist + ((output.left_velocity * 1) * dt);  //radians
+        //right_encoder_dist = right_encoder_dist + ((output.right_velocity * 1) * dt);
+        //gyro_angle = gyro_angle + (output.angular_velocity);
+
+        //left_encoder_dist = left_encoder_dist + ((output.left_feedforward_voltage * 2.5) * dt);
+        //right_encoder_dist = right_encoder_dist + ((output.right_feedforward_voltage * 2.5) * dt);
+        //gyro_angle = gyro_angle + -(output.left_feedforward_voltage - output.right_feedforward_voltage)/12.0;
+
+        left_encoder_dist = left_encoder_dist + ((output.left_velocity * 0.8) * dt) + (12 * output.left_feedforward_voltage / 12.0) * dt;
+        right_encoder_dist = right_encoder_dist + ((output.right_velocity * 0.8) * dt) + (12 * output.left_feedforward_voltage / 12.0) * dt;
+        double turn_volt_velo = 0.25 * (-(output.left_feedforward_voltage - output.right_feedforward_voltage) / 12.0);
+        gyro_angle = gyro_angle + turn_volt_velo + (output.angular_velocity * 0.5);
+
         //---------------------------------------------
 
         Pose2d error = autoUtility.error();
@@ -144,10 +154,10 @@ public class AutoTesting extends Canvas {
         stateEstimator.onLoop(now, rotationToLinear(left_encoder_dist), rotationToLinear(right_encoder_dist), 0, 0, gyro_angle);
         //throw setpoint rotation back and just treat as gyro for now
 
-        System.out.println("error: " + error.getPose().toString());
-        System.out.println("wheel velos: " + rotationToLinear(output.left_velocity) + " " + rotationToLinear(output.right_velocity));
+        //System.out.println("error: " + error.getPose().toString());
+        //System.out.println("wheel velos: " + rotationToLinear(output.left_velocity) + " " + rotationToLinear(output.right_velocity));
         EasyDrawing.debug_info = rotationToLinear(output.left_velocity) + " " + rotationToLinear(output.right_velocity) + "          " + currentRobotPose.getRotation().getDegrees() + "        " + dist_front_back;
-        System.out.println("-----");
+        //System.out.println("-----");
 
         setOutput(new DriveSignal(output.left_velocity, output.right_velocity),
                 new DriveSignal(output.left_feedforward_voltage / 12.0, output.right_feedforward_voltage / 12.0), left_accel, right_accel);
